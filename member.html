@@ -3,61 +3,47 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>萌乐多儿童乐园 - 会员端</title>
+<title>萌乐多儿童乐园 - 二维码更新</title>
 <style>
-body{font-family:-apple-system,PingFang SC,Microsoft YaHei,sans-serif;background:#FFF5F5;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}
-.card{background:#fff;border-radius:24px;padding:40px;max-width:400px;width:90%;box-shadow:0 8px 32px rgba(255,107,129,.15);text-align:center}
-h1{color:#FF6B81;font-size:20px;margin:0 0 8px}
-p{color:#999;font-size:14px}
-.spinner{width:32px;height:32px;border:3px solid #FFE0E6;border-top-color:#FF6B81;border-radius:50%;animation:spin .8s linear infinite;margin:16px auto}
-@keyframes spin{to{transform:rotate(360deg)}}
-.retry-info{color:#E8456A;font-size:13px;display:none;margin-top:8px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,PingFang SC,Microsoft YaHei,sans-serif;background:#FFF5F5;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{background:#fff;border-radius:24px;padding:36px 28px;max-width:420px;width:100%;box-shadow:0 8px 32px rgba(255,107,129,.15);text-align:center}
+h1{color:#FF6B81;font-size:20px;margin-bottom:6px}
+h2{color:#666;font-size:15px;font-weight:400;margin-bottom:20px}
+.tip-box{background:#FFF0F3;border-radius:14px;padding:14px;margin-bottom:20px;font-size:13px;color:#E8456A;line-height:1.7}
+.qr-section{margin-bottom:20px}
+.qr-label{font-size:15px;font-weight:600;color:#333;margin-bottom:10px}
+.qr-wrap{display:inline-block;background:#fff;padding:10px;border-radius:14px;border:2px solid #FFE0E6;position:relative}
+.qr-wrap img{display:block;width:220px;height:220px}
+.save-hint{font-size:12px;color:#999;margin-top:8px}
+.btn{display:inline-block;margin-top:14px;padding:12px 36px;background:linear-gradient(135deg,#FF6B81,#FF8E9E);color:#fff;border-radius:24px;text-decoration:none;font-size:15px;font-weight:600;box-shadow:0 4px 12px rgba(255,107,129,.3)}
+.btn:active{transform:scale(.97)}
+.divider{height:1px;background:#FFE0E6;margin:20px 0}
+.direct-link{font-size:13px;color:#666;word-break:break-all;padding:10px;background:#FFF8F8;border-radius:10px;line-height:1.6}
+.direct-link a{color:#FF6B81;text-decoration:underline}
 </style>
 </head>
 <body>
 <div class="card">
   <h1>萌乐多儿童乐园</h1>
-  <p id="status">正在跳转到会员端...</p>
-  <div class="spinner" id="spin"></div>
-  <div class="retry-info" id="retry"></div>
+  <h2>会员端二维码已更新</h2>
+  <div class="tip-box">
+    您扫描的旧二维码已停用，请使用下方新二维码。<br>
+    <strong>长按新二维码图片，选择"保存图片"保存到手机相册。</strong>
+  </div>
+  <div class="qr-section">
+    <div class="qr-label">会员端新二维码</div>
+    <div class="qr-wrap">
+      <img src="qrcode-member.png" alt="会员端新二维码">
+    </div>
+    <div class="save-hint">长按图片 → 保存到相册</div>
+  </div>
+  <a class="btn" href="https://mengleduo.online/member.html">直接访问</a>
+  <div class="divider"></div>
+  <div class="direct-link">
+    也可以直接点击访问：<br>
+    <a href="https://mengleduo.online/member.html">https://mengleduo.online/member.html</a>
+  </div>
 </div>
-<script>
-var maxRetry=6,retryDelay=3000,attempts=0;
-function tryRedirect(){
-  attempts++;
-  fetch("config.json?_="+Date.now()).then(function(r){return r.json();}).then(function(c){
-    var url=c.member||(c.baseUrl?c.baseUrl+"/member.html":null);
-    if(!url) throw new Error("配置中无地址");
-    // 先探测服务器是否在线，避免跳转到死链
-    var healthUrl=url.replace(/\/member\.html$/,"")+"/api/health";
-    fetch(healthUrl,{mode:"cors",signal:AbortSignal.timeout(5000)}).then(function(){
-      window.location.replace(url);
-    }).catch(function(){
-      if(attempts<maxRetry){
-        document.getElementById("retry").style.display="block";
-        document.getElementById("retry").textContent="服务正在启动，第"+(attempts+1)+"次重试...";
-        setTimeout(tryRedirect,retryDelay);
-      } else {
-        document.getElementById("status").textContent="暂时无法连接";
-        document.getElementById("retry").style.display="block";
-        document.getElementById("retry").textContent="服务器可能正在重启，请稍后刷新页面重试";
-        document.getElementById("spin").style.display="none";
-      }
-    });
-  }).catch(function(e){
-    if(attempts<maxRetry){
-      document.getElementById("retry").style.display="block";
-      document.getElementById("retry").textContent="正在获取服务地址，第"+(attempts+1)+"次重试...";
-      setTimeout(tryRedirect,retryDelay);
-    } else {
-      document.getElementById("status").textContent="跳转失败";
-      document.getElementById("retry").style.display="block";
-      document.getElementById("retry").textContent="服务暂时不可用，请稍后刷新重试";
-      document.getElementById("spin").style.display="none";
-    }
-  });
-}
-tryRedirect();
-</script>
 </body>
 </html>
