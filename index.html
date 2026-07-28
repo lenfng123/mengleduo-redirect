@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>萌乐多儿童乐园 - 管理端</title>
+<title>萌乐多儿童乐园</title>
 <style>
 body{font-family:-apple-system,PingFang SC,Microsoft YaHei,sans-serif;background:#FFF5F5;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}
 .card{background:#fff;border-radius:24px;padding:40px;max-width:400px;width:90%;box-shadow:0 8px 32px rgba(255,107,129,.15);text-align:center}
@@ -17,27 +17,32 @@ p{color:#999;font-size:14px}
 <body>
 <div class="card">
   <h1>萌乐多儿童乐园</h1>
-  <p id="status">正在跳转到管理端...</p>
+  <p id="status">正在跳转...</p>
   <div class="spinner" id="spin"></div>
   <div class="retry-info" id="retry"></div>
 </div>
 <script>
+var params=new URLSearchParams(window.location.search);
+var type=params.get('type')||'admin';
+var label=type==='member'?'会员端':'管理端';
+document.getElementById('status').textContent='正在跳转到'+label+'...';
+document.title='萌乐多儿童乐园 - '+label;
 var maxRetry=6,retryDelay=3000,attempts=0;
 function tryRedirect(){
   attempts++;
   fetch("config.json?_="+Date.now()).then(function(r){return r.json();}).then(function(c){
-    var url=c.admin||c.baseUrl;
-    if(!url) throw new Error("配置中无地址");
-    // 验证地址可访问（用fetch探测，避免跳转到死链）
+    var url;
+    if(type==='member'){url=c.member||(c.baseUrl+'/member.html');}
+    else{url=c.admin||c.baseUrl;}
+    if(!url)throw new Error("配置中无地址");
     fetch(url+"/api/health",{mode:"cors",signal:AbortSignal.timeout(5000)}).then(function(){
       window.location.replace(url);
     }).catch(function(){
-      // 地址暂时不可达，重试
       if(attempts<maxRetry){
         document.getElementById("retry").style.display="block";
         document.getElementById("retry").textContent="服务正在启动，第"+(attempts+1)+"次重试...";
         setTimeout(tryRedirect,retryDelay);
-      } else {
+      }else{
         document.getElementById("status").textContent="暂时无法连接";
         document.getElementById("retry").style.display="block";
         document.getElementById("retry").textContent="服务器可能正在重启，请稍后刷新页面重试";
@@ -49,7 +54,7 @@ function tryRedirect(){
       document.getElementById("retry").style.display="block";
       document.getElementById("retry").textContent="正在获取服务地址，第"+(attempts+1)+"次重试...";
       setTimeout(tryRedirect,retryDelay);
-    } else {
+    }else{
       document.getElementById("status").textContent="跳转失败";
       document.getElementById("retry").style.display="block";
       document.getElementById("retry").textContent="服务暂时不可用，请稍后刷新重试";
